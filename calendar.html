@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier de Disponibilité - Le Cosy Camarguais</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .calendar-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .calendar-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .calendar-controls button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .calendar-controls button:hover {
+            background-color: #2980b9;
+        }
+
+        .calendar-month {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            min-width: 200px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            background-color: #f9f9f9;
+        }
+
+        .calendar-day:hover {
+            border-color: #3498db;
+            background-color: #e8f4f8;
+        }
+
+        .calendar-day.empty {
+            background-color: white;
+            cursor: default;
+            border: none;
+        }
+
+        .calendar-day.empty:hover {
+            background-color: white;
+            border: none;
+        }
+
+        .calendar-day.available {
+            background-color: #d4edda;
+            border-color: #27ae60;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .calendar-day.available:hover {
+            background-color: #c3e6cb;
+        }
+
+        .calendar-day.reserved {
+            background-color: #f8d7da;
+            border-color: #e74c3c;
+            color: #721c24;
+            font-weight: bold;
+        }
+
+        .calendar-day.reserved:hover {
+            background-color: #f5c6cb;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.selected {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .reservation-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .reservation-form h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        .date-range {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .date-range p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .submit-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #229954;
+        }
+
+        .submit-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                padding: 15px;
+                margin: 20px auto;
+            }
+
+            .calendar-controls {
+                flex-direction: column;
+            }
+
+            .calendar-day {
+                font-size: 12px;
+            }
+
+            .legend {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <a href="index.html" class="back-link">← Retour au site</a>
+
+        <div class="calendar-header">
+            <h1>📅 Calendrier de Disponibilité</h1>
+            <p>Sélectionnez vos dates de séjour</p>
+        </div>
+
+        <div id="successMessage" class="success-message">✅ Réservation envoyée avec succès !</div>
+        <div id="errorMessage" class="error-message">❌ Erreur : Veuillez remplir tous les champs</div>
+
+        <div class="calendar-controls">
+            <button id="prevBtn">← Mois précédent</button>
+            <div class="calendar-month" id="monthDisplay"></div>
+            <button id="nextBtn">Mois suivant →</button>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #d4edda; border-color: #27ae60;"></div>
+                <span>Disponible</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f8d7da; border-color: #e74c3c;"></div>
+                <span>Réservé</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #3498db;"></div>
+                <span>Sélectionné</span>
+            </div>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid"></div>
+
+        <div class="reservation-form">
+            <h3>Réserver votre séjour</h3>
+
+            <div class="date-range" id="dateRange" style="display: none;">
+                <p><strong>Dates sélectionnées :</strong></p>
+                <p>Du <span id="startDate"></span> au <span id="endDate"></span></p>
+                <p><strong>Nombre de nuits :</strong> <span id="nights"></span></p>
+                <p><strong>Prix estimé :</strong> <span id="estimatedPrice"></span>€</p>
+            </div>
+
+            <form id="reservationForm">
+                <div class="form-group">
+                    <label for="rName">Nom complet *</label>
+                    <input type="text" id="rName" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rEmail">Email *</label>
+                    <input type="email" id="rEmail" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rPhone">Téléphone *</label>
+                    <input type="tel" id="rPhone" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rMessage">Message (optionnel)</label>
+                    <textarea id="rMessage" name="message" rows="3" placeholder="Toute information supplémentaire..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn" disabled>Envoyer la demande de réservation</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const PRICE_PER_NIGHT = 110;
+        const RESERVED_DATES = JSON.parse(localStorage.getItem('reservedDates') || '[]');
+
+        // Variables
+        let currentDate = new Date();
+        let selectedDates = [];
+
+        // Éléments DOM
+        const monthDisplay = document.getElementById('monthDisplay');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const dateRangeDiv = document.getElementById('dateRange');
+        const startDateSpan = document.getElementById('startDate');
+        const endDateSpan = document.getElementById('endDate');
+        const nightsSpan = document.getElementById('nights');
+        const estimatedPriceSpan = document.getElementById('estimatedPrice');
+        const reservationForm = document.getElementById('reservationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Fonctions
+        function formatDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('fr-FR', options);
+        }
+
+        function dateToString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function isDateReserved(date) {
+            return RESERVED_DATES.includes(dateToString(date));
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // Afficher le mois
+            monthDisplay.textContent = currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+            // Obtenir le premier jour du mois et le nombre de jours
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+
+            // Effacer la grille
+            calendarGrid.innerHTML = '';
+
+            // Ajouter les en-têtes des jours
+            const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+            dayNames.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // Ajouter les jours vides avant le premier jour du mois
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // Ajouter les jours du mois
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = dateToString(date);
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+
+                if (isDateReserved(date)) {
+                    dayElement.classList.add('reserved');
+                    dayElement.style.cursor = 'not-allowed';
+                } else {
+                    dayElement.classList.add('available');
+                    dayElement.addEventListener('click', () => selectDate(date, dateStr));
+                }
+
+                if (selectedDates.includes(dateStr)) {
+                    dayElement.classList.add('selected');
+                }
+
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        function selectDate(date, dateStr) {
+            if (isDateReserved(date)) return;
+
+            const index = selectedDates.indexOf(dateStr);
+            if (index > -1) {
+                selectedDates.splice(index, 1);
+            } else {
+                selectedDates.push(dateStr);
+            }
+
+            selectedDates.sort();
+            updateDateRange();
+            renderCalendar();
+        }
+
+        function updateDateRange() {
+            if (selectedDates.length === 0) {
+                dateRangeDiv.style.display = 'none';
+                submitBtn.disabled = true;
+            } else if (selectedDates.length === 1) {
+                dateRangeDiv.style.display = 'block';
+                startDateSpan.textContent = formatDate(new Date(selectedDates[0]));
+                endDateSpan.textContent = formatDate(new Date(selectedDates[0]));
+                nightsSpan.textContent = '1';
+                estimatedPriceSpan.textContent = PRICE_PER_NIGHT;
+                submitBtn.disabled = false;
+            } else {
+                dateRangeDiv.style.display = 'block';
+                const startDate = new Date(selectedDates[0]);
+                const endDate = new Date(selectedDates[selectedDates.length - 1]);
+                startDateSpan.textContent = formatDate(startDate);
+                endDateSpan.textContent = formatDate(endDate);
+
+                const nights = selectedDates.length;
+                nightsSpan.textContent = nights;
+                estimatedPriceSpan.textContent = nights * PRICE_PER_NIGHT;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Événements
+        prevBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        reservationForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('rName').value;
+            const email = document.getElementById('rEmail').value;
+            const phone = document.getElementById('rPhone').value;
+            const message = document.getElementById('rMessage').value;
+
+            if (!name || !email || !phone || selectedDates.length === 0) {
+                showError('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+
+            // Sauvegarder la réservation
+            const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+            reservations.push({
+                id: Date.now(),
+                name,
+                email,
+                phone,
+                message,
+                dates: selectedDates,
+                nights: selectedDates.length,
+                price: selectedDates.length * PRICE_PER_NIGHT,
+                date: new Date().toLocaleDateString('fr-FR')
+            });
+            localStorage.setItem('reservations', JSON.stringify(reservations));
+
+            // Ajouter aux dates réservées
+            RESERVED_DATES.push(...selectedDates);
+            localStorage.setItem('reservedDates', JSON.stringify(RESERVED_DATES));
+
+            showSuccess('Réservation envoyée avec succès ! Nous vous contacterons bientôt.');
+            selectedDates = [];
+            reservationForm.reset();
+            updateDateRange();
+            renderCalendar();
+        });
+
+        function showSuccess(msg) {
+            successMessage.textContent = msg;
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(msg) {
+            errorMessage.textContent = '❌ ' + msg;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialiser
+        renderCalendar();
+    </script>
+</body>
+</html>
