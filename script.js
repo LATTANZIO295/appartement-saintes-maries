@@ -1,3 +1,25 @@
+// Load custom photos from localStorage
+function loadCustomPhotos() {
+    const photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+    const galleryGrid = document.querySelector('.gallery-grid');
+    
+    if (galleryGrid && photos.length > 0) {
+        photos.forEach(photo => {
+            const photoElement = document.createElement('div');
+            photoElement.className = 'gallery-item';
+            photoElement.innerHTML = `<img src="${photo.src}" alt="${photo.alt}" loading="lazy">`;
+            galleryGrid.appendChild(photoElement);
+        });
+    }
+}
+
+// Load custom photos when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadCustomPhotos);
+} else {
+    loadCustomPhotos();
+}
+
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
